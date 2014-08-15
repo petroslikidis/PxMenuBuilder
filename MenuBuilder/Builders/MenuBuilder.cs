@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using PCAxis.Paxiom.Extensions;
 
 namespace MenuBuilder
 {
@@ -267,6 +268,13 @@ namespace MenuBuilder
             // Store dates in the PC-Axis date format
             tbl.SetAttribute("updated", info.LastWriteTime.ToString(PCAxis.Paxiom.PXConstant.PXDATEFORMAT));
             tbl.SetAttribute("modified", GetLastModified(meta));
+
+            string lastUpdated = GetLastModified(meta);
+            if (PxDate.IsPxDate(lastUpdated))
+            {
+                tbl.LastUpdated = PxDate.PxDateStringToDateTime(lastUpdated);
+            }
+            tbl.Published = info.LastWriteTime;
 
             return tbl;
         }

@@ -117,7 +117,9 @@ namespace MenuBuilder
         /// <returns>the contents of the file</returns>
         private string ReadAll(string path)
         {
-            System.Text.Encoding encoding = PCAxis.Paxiom.Parsers.PXFileParser.GetEncoding(path);
+            //    System.Text.Encoding encoding = PCAxis.Paxiom.Parsers.PXFileParser.GetEncoding(path); Jukka: Does not work
+            System.Text.Encoding encoding = System.Text.Encoding.Default;
+
             string data;
 
             using (System.IO.StreamReader reader =

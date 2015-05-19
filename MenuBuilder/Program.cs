@@ -19,12 +19,17 @@ namespace MenuBuilder
             List<string> languages = new List<string>();
             languages.Add(defaultLanguage);
             bool languageDependent = true;
+            bool sortByFileName = false;
             string path = "";
             for (int i = 1; i < args.Length; i++)
             {
                 if (args[i] == "/N")
                 {
                     languageDependent = false;
+                }
+                else if (args[i] == "/F")
+                {
+                    sortByFileName = true;
                 }
                 else if (args[i] == "/L")
                 {
@@ -52,7 +57,7 @@ namespace MenuBuilder
                 {
                     if (i != (args.Length - 1))
                     {
-                        Console.WriteLine("Invalid parameter " + args[i+1]);
+                        Console.WriteLine("Invalid parameter " + args[i + 1]);
                         PrintUsage();
                         return;
                     }
@@ -75,7 +80,7 @@ namespace MenuBuilder
                 return;
             }
 
-            GenerateMenuFile(path, defaultLanguage, languages, languageDependent);
+            GenerateMenuFile(path, defaultLanguage, languages, languageDependent, sortByFileName);
 
             
         }
@@ -87,7 +92,7 @@ namespace MenuBuilder
         /// <param name="defaultLanguage"></param>
         /// <param name="langs"></param>
         /// <param name="langDependent"></param>
-        static void GenerateMenuFile(string path, string defaultLanguage, List<string> langs, bool langDependent)
+        static void GenerateMenuFile(string path, string defaultLanguage, List<string> langs, bool langDependent, bool sortByFileName)
         {
             DatabaseSpider spider;
             spider = new DatabaseSpider();
@@ -100,14 +105,21 @@ namespace MenuBuilder
             handler = new PxFileHandler();
             handler.Initialize(defaultLanguage);
             spider.Handles.Add(handler);
-            
-            spider.Builders.Add(new MenuBuilder(langs.ToArray(), langDependent, defaultLanguage) { SortOrder = (meta, p) => !string.IsNullOrEmpty(meta.Description) ? meta.Description : meta.Title });
+
+            if (sortByFileName)
+            {
+                spider.Builders.Add(new MenuBuilder(langs.ToArray(), langDependent, defaultLanguage) { SortOrder = (meta, p) => System.IO.Path.GetFileNameWithoutExtension(meta.MainTable).ToLower() });
+            }
+            else
+            {
+                spider.Builders.Add(new MenuBuilder(langs.ToArray(), langDependent, defaultLanguage) { SortOrder = (meta, p) => !string.IsNullOrEmpty(meta.Description) ? meta.Description : meta.Title });
+            }
             spider.Search(path);
 
             foreach (var msg in spider.Messages)
             {
                 Console.WriteLine(msg.MessageType + " " + msg.Message);
-            }         
+            }
         }
 
 
@@ -118,7 +130,7 @@ namespace MenuBuilder
         {
             Console.WriteLine("Creates a Menu.xml file for PX-Web ");
             Console.WriteLine();
-            Console.WriteLine("MenuBuilder 'dafault language' [/L 'list of languages'] [/N] 'path'");
+            Console.WriteLine("MenuBuilder 'dafault language' [/L 'list of languages'] [/N] [/F] 'path'");
             Console.WriteLine();
             Console.WriteLine("dafault language    the default language of the database.");
             Console.WriteLine("/L                  Additional languages other than the default language that");
@@ -126,6 +138,7 @@ namespace MenuBuilder
             Console.WriteLine("                    The list so be comma separated");
             Console.WriteLine("/N                  If all files in the database should be included even if");
             Console.WriteLine("                    they are not translated");
+            Console.WriteLine("/F                  Sort by file name");
             Console.WriteLine("path                Name of the folder for the PX-database");
         }
     }

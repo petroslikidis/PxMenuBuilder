@@ -158,7 +158,6 @@ namespace MenuBuilder
                 if (Array.IndexOf(_languages, alias.Language) >= 0)
                 {
                     _currentItems[alias.Language].Text = alias.Alias;
-                    _currentItems[alias.Language].SortCode = alias.Alias;
                 }
             }
             else if (item is LinkItem)
@@ -172,6 +171,14 @@ namespace MenuBuilder
                         Url url = new Url(itm.Text, "", "MENU_TEST", itm.Location, "", PresCategory.NotSet, itm.Location, LinkPres.NotSet);
                         _currentItems[itm.Language].SubItems.Add(url);
                     }
+                }
+            }
+            else if (item is MenuSortItem)
+            {
+                MenuSortItem sort = item as MenuSortItem;
+                if (Array.IndexOf(_languages, sort.Language) >= 0)
+                {
+                    _currentItems[sort.Language].SortCode = sort.SortString;
                 }
             }
             else if (item is PCAxis.Paxiom.PXMeta)

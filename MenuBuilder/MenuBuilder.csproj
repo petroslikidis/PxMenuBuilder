@@ -65,12 +65,14 @@
     <Compile Include="DatabaseMessage.cs" />
     <Compile Include="DatabaseSpider.cs" />
     <Compile Include="Handlers\AliasFileHandler.cs" />
+    <Compile Include="Handlers\MenuSortFileHandler.cs" />
     <Compile Include="Handlers\PXFileHandler.cs" />
     <Compile Include="Handlers\LinkFileHandler.cs" />
     <Compile Include="Interfaces\IDatabaseBuilder.cs" />
     <Compile Include="Interfaces\IItemHandler.cs" />
     <Compile Include="Items\AliasItem.cs" />
     <Compile Include="Items\LinkItem.cs" />
+    <Compile Include="Items\MenuSortItem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -9,7 +9,7 @@ namespace MenuBuilder
     {
         static void Main(string[] args)
         {
-            if (args.Length < 1 || args.Length > 5)
+            if (args.Length < 1 || args.Length > 7)
             {
                 PrintUsage();
                 return;
@@ -19,6 +19,7 @@ namespace MenuBuilder
             List<string> languages = new List<string>();
             languages.Add(defaultLanguage);
             bool languageDependent = true;
+            string sortOrder = "title";
             string path = "";
             for (int i = 1; i < args.Length; i++)
             {
@@ -48,11 +49,30 @@ namespace MenuBuilder
                     }
                     i++;
                 }
+                else if (args[i] == "/S") 
+                {
+                    if (i + 1 > args.Length)
+                    {
+                        Console.WriteLine("Missing sort order\n");
+                        PrintUsage();
+                        return;
+                    }
+                    sortOrder = args[i + 1];
+
+                    if (!(sortOrder == "file" || sortOrder == "title" || sortOrder == "matrix"))
+                    {
+                        Console.WriteLine(string.Format("Invalid sort order {0}\n", sortOrder));
+                        PrintUsage();
+                        return;
+                    }
+
+                    i++;
+                }
                 else
                 {
                     if (i != (args.Length - 1))
                     {
-                        Console.WriteLine("Invalid parameter " + args[i+1]);
+                        Console.WriteLine("Invalid parameter " + args[i + 1]);
                         PrintUsage();
                         return;
                     }
@@ -75,9 +95,8 @@ namespace MenuBuilder
                 return;
             }
 
-            GenerateMenuFile(path, defaultLanguage, languages, languageDependent);
+            GenerateMenuFile(path, defaultLanguage, languages, languageDependent, sortOrder);
 
-            
         }
 
         /// <summary>
@@ -87,7 +106,7 @@ namespace MenuBuilder
         /// <param name="defaultLanguage"></param>
         /// <param name="langs"></param>
         /// <param name="langDependent"></param>
-        static void GenerateMenuFile(string path, string defaultLanguage, List<string> langs, bool langDependent)
+        static void GenerateMenuFile(string path, string defaultLanguage, List<string> langs, bool langDependent, string sortOrder)
         {
             DatabaseSpider spider;
             spider = new DatabaseSpider();
@@ -101,7 +120,7 @@ namespace MenuBuilder
             handler.Initialize(defaultLanguage);
             spider.Handles.Add(handler);
             
-            spider.Builders.Add(new MenuBuilder(langs.ToArray(), langDependent, defaultLanguage) { SortOrder = (meta, p) => !string.IsNullOrEmpty(meta.Description) ? meta.Description : meta.Title });
+            spider.Builders.Add(new MenuBuilder(langs.ToArray(), langDependent, defaultLanguage) { SortOrder = GetSortOrder(sortOrder) });
             spider.Search(path);
 
             foreach (var msg in spider.Messages)
@@ -110,6 +129,19 @@ namespace MenuBuilder
             }         
         }
 
+        private static Func<PCAxis.Paxiom.PXMeta, string, string> GetSortOrder(string sortOrder)
+        {
+            switch (sortOrder)
+            {
+                case "matrix":
+                    return (meta, path) => meta.Matrix;
+                case "file":
+                    return (meta, path) => System.IO.Path.GetFileNameWithoutExtension(path);
+                case "title":
+                default:
+                    return (meta, path) => !string.IsNullOrEmpty(meta.Description) ? meta.Description : meta.Title;
+            }
+        }
 
         /// <summary>
         /// Prints usage
@@ -118,14 +150,18 @@ namespace MenuBuilder
         {
             Console.WriteLine("Creates a Menu.xml file for PX-Web ");
             Console.WriteLine();
-            Console.WriteLine("MenuBuilder 'dafault language' [/L 'list of languages'] [/N] 'path'");
+            Console.WriteLine("MenuBuilder 'dafault language' [/L 'list of languages'] [/N] [/S <title|matrix|file>] 'path'");
             Console.WriteLine();
             Console.WriteLine("dafault language    the default language of the database.");
             Console.WriteLine("/L                  Additional languages other than the default language that");
             Console.WriteLine("                    the menu should be generated for.");
-            Console.WriteLine("                    The list so be comma separated");
+            Console.WriteLine("                    The list should be comma separated");
             Console.WriteLine("/N                  If all files in the database should be included even if");
             Console.WriteLine("                    they are not translated");
+            Console.WriteLine("/S                  Sort order could  be one of the following values");
+            Console.WriteLine("                    > title");
+            Console.WriteLine("                    > matrix");
+            Console.WriteLine("                    > file");
             Console.WriteLine("path                Name of the folder for the PX-database");
         }
     }

@@ -116,6 +116,9 @@ namespace MenuBuilder
             handler = new LinkFileHandler();
             handler.Initialize(defaultLanguage);
             spider.Handles.Add(handler);
+            handler = new MenuSortFileHandler();
+            handler.Initialize(defaultLanguage);
+            spider.Handles.Add(handler);
             handler = new PxFileHandler();
             handler.Initialize(defaultLanguage);
             spider.Handles.Add(handler);
